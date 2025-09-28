@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mentorship Management - Alumni Nexus Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .mentorship-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+    }
+    
+    .mentorship-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .mentorship-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    
+    .mentee-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .mentee-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--primary);
+    }
+    
+    .mentee-details h4 {
+      margin: 0;
+      font-weight: 600;
+      color: var(--foreground);
+    }
+    
+    .mentee-details p {
+      margin: 0;
+      font-size: 0.875rem;
+      color: var(--muted-foreground);
+    }
+    
+    .time-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--muted-foreground);
+    }
+    
+    .domain-badge {
+      background: var(--muted);
+      color: var(--foreground);
+      padding: 0.25rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+      display: inline-block;
+    }
+    
+    .mentorship-message {
+      font-size: 0.875rem;
+      color: var(--muted-foreground);
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+    
+    .mentorship-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-approve {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+    }
+    
+    .btn-approve:hover {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    }
+    
+    .btn-reject {
+      background: var(--muted);
+      color: var(--foreground);
+      border: 1px solid var(--border);
+    }
+    
+    .btn-reject:hover {
+      background: var(--accent);
+    }
+    
+    .btn-find-match {
+      background: none;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+    
+    .btn-find-match:hover {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .match-card {
+      border: 2px dashed var(--border);
+      background: var(--muted);
+      padding: 1rem;
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+    }
+    
+    .match-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+    
+    .match-score {
+      background: var(--primary);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .match-connection {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .match-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--primary);
+    }
+    
+    .match-details h4 {
+      margin: 0;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    
+    .match-details p {
+      margin: 0;
+      font-size: 0.75rem;
+      color: var(--muted-foreground);
+    }
+    
+    .expertise-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .expertise-tag {
+      background: var(--accent);
+      color: var(--accent-foreground);
+      padding: 0.125rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+    }
+    
+    .btn-connect {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-connect:hover {
+      background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar glass-card">
+      <div class="sidebar-header">
+        <div class="logo-section">
+          <div class="logo-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="logo-text">
+            <h2 class="gradient-text">Alumni Nexus</h2>
+            <p>Admin Dashboard</p>
+          </div>
+        </div>
+      </div>
+      
+      <nav class="sidebar-content">
+        <ul class="sidebar-menu">
+          <li class="sidebar-item" data-view="dashboard">
+            <a href="index.html" class="sidebar-link">
+              <i class="fas fa-home"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="alumni">
+            <a href="alumni.html" class="sidebar-link">
+              <i class="fas fa-users"></i>
+              <span>Alumni Directory</span>
+              <span class="badge">12.5K</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="events">
+            <a href="events.html" class="sidebar-link">
+              <i class="fas fa-calendar"></i>
+              <span>Events</span>
+              <span class="badge">4</span>
+            </a>
+          </li>
+          <li class="sidebar-item active" data-view="mentorship">
+            <a href="mentorship.html" class="sidebar-link">
+              <i class="fas fa-handshake"></i>
+              <span>Mentorship</span>
+              <span class="badge">89</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="donations">
+            <a href="donations.html" class="sidebar-link">
+              <i class="fas fa-heart"></i>
+              <span>Donations</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="analytics">
+            <a href="analytics.html" class="sidebar-link">
+              <i class="fas fa-chart-bar"></i>
+              <span>Analytics</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="settings">
+            <a href="settings.html" class="sidebar-link">
+              <i class="fas fa-cog"></i>
+              <span>Settings</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="dark-mode-toggle">
+          <div class="toggle-content">
+            <i class="fas fa-sun dark-mode-icon"></i>
+            <span>Dark Mode</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="darkModeToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+        
+        <div class="user-profile">
+          <div class="user-avatar">
+            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx5b3VuZyUyMHByb2Zlc3Npb25hbCUyMHdvbWFufGVufDF8fHx8MTc1OTA3ODQ1NHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" alt="Admin">
+          </div>
+          <div class="user-info">
+            <div class="user-name">Admin User</div>
+            <div class="user-email">admin@university.edu</div>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header glass-card">
+        <div class="header-left">
+          <button class="sidebar-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" placeholder="Search alumni, events, campaigns..." class="search-input">
+          </div>
+        </div>
+        
+        <div class="header-right">
+          <div class="notifications">
+            <button class="notification-btn">
+              <i class="fas fa-bell"></i>
+              <span class="notification-badge">3</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="content-area">
+        <!-- Mentorship View -->
+        <div id="mentorship-view" class="view-content active">
+          <!-- Pending Requests Section -->
+          <div class="glass-card" style="padding: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="card-header">
+              <h2 class="gradient-text">Pending Mentorship Requests</h2>
+              <p style="color: var(--muted-foreground); margin: 0;">Review and approve mentorship requests from alumni</p>
+            </div>
+            <div id="mentorship-requests-container" style="margin-top: 1.5rem;">
+              <!-- Mentorship requests will be populated here -->
+            </div>
+          </div>
+
+          <!-- AI Match Suggestions Section -->
+          <div class="glass-card" style="padding: 1.5rem;">
+            <div class="card-header">
+              <h2 class="gradient-text">
+                <i class="fas fa-magic" style="margin-right: 0.5rem;"></i>
+                AI-Powered Match Suggestions
+              </h2>
+              <p style="color: var(--muted-foreground); margin: 0;">Smart mentor-mentee matching based on expertise and goals</p>
+            </div>
+            <div id="match-suggestions-container" style="margin-top: 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+              <!-- Match suggestions will be populated here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Sample Mentorship Data
+    const mentorshipRequests = [
+      {
+        id: 1,
+        mentee: {
+          name: "Alex Thompson",
+          batch: "2023",
+          department: "Computer Science",
+          avatar: "https://images.unsplash.com/photo-1581065178047-8ee15951ede6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBidXNpbmVzcyUyMHBvcnRyYWl0fGVufDF8fHx8MTc1OTA2Mzg4M3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+        },
+        requestedDomain: "Software Engineering",
+        message: "Looking for guidance in transitioning from backend to full-stack development. Interested in learning about system design and frontend technologies.",
+        submittedDate: "2024-12-01",
+        status: "pending"
+      },
+      {
+        id: 2,
+        mentee: {
+          name: "Rachel Green",
+          batch: "2022",
+          department: "Business Administration",
+          avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx5b3VuZyUyMHByb2Zlc3Npb25hbCUyMHdvbWFufGVufDF8fHx8MTc1OTA3ODQ1NHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+        },
+        requestedDomain: "Product Management",
+        message: "Seeking mentorship to break into product management role. Want to understand market analysis and product strategy.",
+        submittedDate: "2024-11-28",
+        status: "pending"
+      },
+      {
+        id: 3,
+        mentee: {
+          name: "Marcus Johnson",
+          batch: "2021",
+          department: "Finance",
+          avatar: "https://images.unsplash.com/photo-1589458223095-03eee50f0054?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxidXNpbmVzcyUyMGV4ZWN1dGl2ZSUyMG1hbnxlbnwxfHx8fDE3NTkwODUzNjh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+        },
+        requestedDomain: "Investment Banking",
+        message: "Looking for guidance on IB career path, deal structuring, and networking strategies in finance industry.",
+        submittedDate: "2024-11-25",
+        status: "pending"
+      }
+    ];
+
+    const suggestedMatches = [
+      {
+        menteeId: 1,
+        mentor: {
+          name: "Sarah Johnson",
+          batch: "2019",
+          role: "Senior Software Engineer at Google",
+          expertise: ["Full-Stack Development", "System Design", "React", "Node.js"],
+          avatar: "https://images.unsplash.com/photo-1655249481446-25d575f1c054?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMHdvbWFufGVufDF8fHx8MTc1OTA1NjUyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+        },
+        matchScore: 95
+      },
+      {
+        menteeId: 2,
+        mentor: {
+          name: "Michael Chen",
+          batch: "2018",
+          role: "Product Manager at Microsoft",
+          expertise: ["Product Strategy", "Market Research", "Agile", "User Research"],
+          avatar: "https://images.unsplash.com/photo-1589458223095-03eee50f0054?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxidXNpbmVzcyUyMGV4ZWN1dGl2ZSUyMG1hbnxlbnwxfHx8fDE3NTkwODUzNjh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+        },
+        matchScore: 88
+      }
+    ];
+
+    function createMentorshipRequestCard(request) {
+      const daysSinceSubmission = Math.floor((Date.now() - new Date(request.submittedDate).getTime()) / (1000 * 60 * 60 * 24));
+      
+      return `
+        <div class="mentorship-card">
+          <div class="mentorship-header">
+            <div class="mentee-info">
+              <img src="${request.mentee.avatar}" alt="${request.mentee.name}" class="mentee-avatar">
+              <div class="mentee-details">
+                <h4>${request.mentee.name}</h4>
+                <p>${request.mentee.department} • Batch ${request.mentee.batch}</p>
+              </div>
+            </div>
+            <div class="time-badge">
+              <i class="fas fa-clock"></i>
+              ${daysSinceSubmission}d ago
+            </div>
+          </div>
+
+          <div class="domain-badge">${request.requestedDomain}</div>
+          <div class="mentorship-message">${request.message}</div>
+
+          <div class="mentorship-actions">
+            <div class="action-buttons">
+              <button class="btn-sm btn-approve" onclick="approveRequest(${request.id})">
+                <i class="fas fa-check"></i>
+                Approve
+              </button>
+              <button class="btn-sm btn-reject" onclick="rejectRequest(${request.id})">
+                <i class="fas fa-times"></i>
+                Reject
+              </button>
+            </div>
+            <button class="btn-sm btn-find-match" onclick="findMatch(${request.id})">
+              <i class="fas fa-magic"></i>
+              Find Match
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function createMatchSuggestionCard(match, request) {
+      return `
+        <div class="match-card">
+          <div class="match-header">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <i class="fas fa-magic" style="color: var(--primary);"></i>
+              <span style="font-size: 0.875rem; font-weight: 500;">AI Suggested Match</span>
+            </div>
+            <div class="match-score">${match.matchScore}% match</div>
+          </div>
+          
+          <div class="match-connection">
+            <img src="${request.mentee.avatar}" alt="${request.mentee.name}" class="match-avatar">
+            <i class="fas fa-arrow-right" style="color: var(--muted-foreground);"></i>
+            <img src="${match.mentor.avatar}" alt="${match.mentor.name}" class="match-avatar">
+          </div>
+
+          <div class="match-details">
+            <h4>${match.mentor.name}</h4>
+            <p>${match.mentor.role}</p>
+            <div class="expertise-tags">
+              ${match.mentor.expertise.slice(0, 3).map(skill => `<span class="expertise-tag">${skill}</span>`).join('')}
+            </div>
+          </div>
+
+          <button class="btn-connect" onclick="connectMentorMentee(${match.menteeId}, '${match.mentor.name}')">
+            Connect Mentee & Mentor
+          </button>
+        </div>
+      `;
+    }
+
+    function approveRequest(id) {
+      alert(`Approved mentorship request ${id}`);
+      // Remove from pending requests
+      const index = mentorshipRequests.findIndex(req => req.id === id);
+      if (index > -1) {
+        mentorshipRequests.splice(index, 1);
+        renderMentorshipRequests();
+      }
+    }
+
+    function rejectRequest(id) {
+      alert(`Rejected mentorship request ${id}`);
+      // Remove from pending requests
+      const index = mentorshipRequests.findIndex(req => req.id === id);
+      if (index > -1) {
+        mentorshipRequests.splice(index, 1);
+        renderMentorshipRequests();
+      }
+    }
+
+    function findMatch(id) {
+      alert(`Finding match for request ${id}`);
+    }
+
+    function connectMentorMentee(menteeId, mentorName) {
+      alert(`Connected mentee ${menteeId} with mentor ${mentorName}`);
+    }
+
+    function renderMentorshipRequests() {
+      const container = document.getElementById('mentorship-requests-container');
+      container.innerHTML = mentorshipRequests.map(request => createMentorshipRequestCard(request)).join('');
+    }
+
+    function renderMatchSuggestions() {
+      const container = document.getElementById('match-suggestions-container');
+      container.innerHTML = suggestedMatches.map(match => {
+        const request = mentorshipRequests.find(r => r.id === match.menteeId);
+        return request ? createMatchSuggestionCard(match, request) : '';
+      }).join('');
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      renderMentorshipRequests();
+      renderMatchSuggestions();
+    });
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>

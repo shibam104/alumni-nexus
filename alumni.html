@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alumni Directory - Alumni Nexus Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script defer src="alumni.js"></script>
+  <style>
+    /* Uniform avatar and table styles */
+    .alumni-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 14px;
+      border: 2px solid #667eea33;
+      background: #fff;
+      box-shadow: 0 2px 8px #667eea22;
+      vertical-align: middle;
+      display: block;
+    }
+    .alumni-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .alumni-details {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .batch-badge {
+      background: var(--muted, #ececf0cc);
+      color: var(--foreground, #222);
+      border-radius: 8px;
+      padding: 2px 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      display: inline-block;
+    }
+    .status-badge {
+      border-radius: 8px;
+      padding: 2px 12px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      display: inline-block;
+    }
+    .status-badge.active {
+      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      color: #065f46;
+      cursor: pointer;
+    }
+    .status-badge.active:hover {
+      background: linear-gradient(135deg, #2a9f51 0%, #35ae98 100%);
+      color: #000000;
+    }
+    .status-badge.inactive {
+      background: var(--muted, #ececf0cc);
+      color: #717182;
+      cursor: pointer;
+    }
+    .status-badge.inactive:hover{
+      background: var(--muted, #ececf0cc);
+      color: #222226;
+    }
+    .role-info .job-title {
+      font-weight: 500;
+      color: var(--foreground, #222);
+    }
+    .role-info .company {
+      font-size: 0.95rem;
+      color: var(--muted-foreground, #717182);
+    }
+    .email-cell {
+      font-size: 0.95rem;
+      color: var(--foreground, #222);
+      word-break: break-all;
+    }
+    .alumni-table th, .alumni-table td {
+      vertical-align: middle;
+    }
+    .filter-buttons {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .filter-select {
+      min-width: 140px;
+      padding: 8px 12px;
+      border-radius: var(--radius, 1rem);
+      font-size: 1rem;
+      background: var(--input-background, #fffc);
+      color: var(--foreground, #222);
+      outline: none;
+      border: none;
+      box-shadow: 0 1px 4px #0001;
+      font-weight: 500;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .filter-select:focus {
+      background: var(--accent, #667eea26);
+      box-shadow: 0 2px 8px #667eea22;
+    }
+    .btn-primary, .btn-secondary {
+      min-width: 120px;
+      justify-content: center;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      border-radius: var(--radius, 1rem);
+      padding: 10px 18px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary {
+      background: var(--primary, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+      color: var(--primary-foreground, #fff);
+      box-shadow: 0 2px 8px #667eea33;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+      box-shadow: 0 4px 12px #667eea33;
+    }
+    .btn-secondary {
+      background: var(--muted, #ececf0cc);
+      color: var(--foreground, #222);
+      box-shadow: 0 2px 8px #667eea11;
+    }
+    .btn-secondary:hover {
+      background: var(--accent, #667eea26);
+      box-shadow: 0 4px 12px #667eea22;
+    }
+    .alumni-header {
+      margin-bottom: 32px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .header-content {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      min-width: 0;
+    }
+    .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      background: var(--primary, #667eea);
+      border-radius: 16px;
+      font-size: 2rem;
+      color: var(--primary-foreground, #fff);
+      box-shadow: 0 2px 8px #667eea22;
+      flex-shrink: 0;
+    }
+    .header-text {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+    .gradient-text {
+      font-size: 2rem;
+      font-weight: bold;
+      line-height: 1.2;
+      margin-bottom: 2px;
+      white-space: nowrap;
+    }
+    .header-description {
+      color: var(--muted-foreground, #717182);
+      font-size: 1rem;
+      font-weight: 400;
+      margin: 0;
+    }
+    .filters-container {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 18px;
+      margin-top: 8px;
+    }
+    .search-container {
+      position: relative;
+      flex: 1 1 220px;
+      min-width: 220px;
+      margin-right: 0;
+      max-width: 350px;
+    }
+    .pagination-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .pagination-container .btn-secondary {
+      min-width: 100px;
+      padding: 8px 16px;
+      font-size: 1rem;
+      font-weight: 500;
+      border-radius: var(--radius, 1rem);
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      background: var(--muted, #ececf0cc);
+      color: var(--foreground, #222);
+      box-shadow: 0 2px 8px #667eea11;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pagination-container .btn-secondary:hover {
+      background: var(--accent, #667eea26);
+      box-shadow: 0 4px 12px #667eea22;
+    }
+    @media (max-width: 700px) {
+      .alumni-header, .alumni-table-container {
+        padding: 12px;
+      }
+      .header-top, .filters-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+      .header-left {
+        gap: 10px;
+      }
+      .logo-container {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+        border-radius: 10px;
+      }
+      .gradient-text {
+        font-size: 1.3rem;
+      }
+      .filter-buttons {
+        gap: 8px;
+      }
+      .pagination-container {
+        gap: 8px;
+      }
+      .btn-primary, .btn-secondary {
+        min-width: 80px;
+        padding: 8px 10px;
+        font-size: 0.95rem;
+      }
+    }
+    /* Uniform spacing for containers */
+    .alumni-container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 16px;
+    }
+    .alumni-header {
+      margin-bottom: 32px;
+      padding: 24px;
+    }
+    .alumni-table-container {
+      padding: 24px;
+    }
+    .table-wrapper {
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar glass-card">
+      <div class="sidebar-header">
+        <div class="logo-section">
+          <div class="logo-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="logo-text">
+            <h2 class="gradient-text">Alumni Nexus</h2>
+            <p>Admin Dashboard</p>
+          </div>
+        </div>
+      </div>
+      
+      <nav class="sidebar-content">
+        <ul class="sidebar-menu">
+          <li class="sidebar-item" data-view="dashboard">
+            <a href="index.html" class="sidebar-link">
+              <i class="fas fa-home"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="sidebar-item active" data-view="alumni">
+            <a href="alumni.html" class="sidebar-link">
+              <i class="fas fa-users"></i>
+              <span>Alumni Directory</span>
+              <span class="badge">12.5K</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="events">
+            <a href="events.html" class="sidebar-link">
+              <i class="fas fa-calendar"></i>
+              <span>Events</span>
+              <span class="badge">4</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="mentorship">
+            <a href="mentorship.html" class="sidebar-link">
+              <i class="fas fa-handshake"></i>
+              <span>Mentorship</span>
+              <span class="badge">89</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="donations">
+            <a href="donations.html" class="sidebar-link">
+              <i class="fas fa-heart"></i>
+              <span>Donations</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="analytics">
+            <a href="analytics.html" class="sidebar-link">
+              <i class="fas fa-chart-bar"></i>
+              <span>Analytics</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="settings">
+            <a href="settings.html" class="sidebar-link">
+              <i class="fas fa-cog"></i>
+              <span>Settings</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="dark-mode-toggle">
+          <div class="toggle-content">
+            <i class="fas fa-sun dark-mode-icon"></i>
+            <span>Dark Mode</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="darkModeToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+        
+        <div class="user-profile">
+          <div class="user-avatar">
+            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx5b3VuZyUyMHByb2Zlc3Npb25hbCUyMHdvbWFufGVufDF8fHx8MTc1OTA3ODQ1NHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" alt="Admin">
+          </div>
+          <div class="user-info">
+            <div class="user-name">Admin User</div>
+            <div class="user-email">admin@university.edu</div>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header glass-card">
+        <div class="header-left">
+          <button class="sidebar-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" placeholder="Search alumni, events, campaigns..." class="search-input">
+          </div>
+        </div>
+        
+        <div class="header-right">
+          <div class="notifications">
+            <button class="notification-btn">
+              <i class="fas fa-bell"></i>
+              <span class="notification-badge">3</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="content-area">
+        <!-- Alumni Directory View -->
+        <div id="alumni-view" class="view-content active">
+          <!-- Header Section -->
+          <div class="alumni-header glass-card">
+            <div class="header-content">
+              <div class="header-top">
+                <div class="header-left">
+                  <div class="logo-container">
+                    <div class="logo-placeholder">👥</div>
+                  </div>
+                  <div class="header-text">
+                    <h2 class="gradient-text">Alumni Directory</h2>
+                    <p class="header-description">
+                      Manage and view all registered alumni
+                    </p>
+                  </div>
+                </div>
+                <button id="exportBtn" class="btn-primary">
+                  <i class="fas fa-download"></i> Export CSV
+                </button>
+              </div>
+
+              <!-- Filters -->
+              <div class="filters-container">
+                <div class="search-container">
+                  <i class="fas fa-search search-icon"></i>
+                  <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search alumni..."
+                    class="search-input"
+                  />
+                </div>
+
+                <div class="filter-buttons">
+                  <select id="statusFilter" class="filter-select btn-secondary">
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                  <select id="departmentFilter" class="filter-select btn-secondary">
+                    <option value="all">All Departments</option>
+                  </select>
+                  <button id="filterBtn" class="btn-primary">
+                    <i class="fas fa-filter"></i> Apply Filters
+                  </button>
+                  <button id="resetBtn" class="btn-secondary">
+                    <i class="fas fa-rotate-left"></i> Reset
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table Section -->
+          <div class="alumni-table-container glass-card">
+            <div class="table-wrapper">
+              <table class="alumni-table">
+                <thead>
+                  <tr class="table-header">
+                    <th>Alumni</th>
+                    <th>Batch</th>
+                    <th>Department</th>
+                    <th>Current Role</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="alumniTableBody">
+                  <!-- Example alumni row with avatar image -->
+                  <tr class="table-row">
+                    <td>
+                      <div class="alumni-info">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="John Doe" class="alumni-avatar">
+                        <div class="alumni-details">
+                          <div class="alumni-name">John Doe</div>
+                          <div class="alumni-meta">Member since 2015</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td><span class="batch-badge">2015</span></td>
+                    <td>Computer Science</td>
+                    <td>
+                      <div class="role-info">
+                        <div class="job-title">Software Engineer</div>
+                        <div class="company">Google</div>
+                      </div>
+                    </td>
+                    <td class="email-cell">john.doe@email.com</td>
+                    <td><span class="status-badge active">Active</span></td>
+                  </tr>
+                  <tr class="table-row">
+                    <td>
+                      <div class="alumni-info">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Jane Smith" class="alumni-avatar">
+                        <div class="alumni-details">
+                          <div class="alumni-name">Jane Smith</div>
+                          <div class="alumni-meta">Member since 2017</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td><span class="batch-badge">2017</span></td>
+                    <td>Electrical Engineering</td>
+                    <td>
+                      <div class="role-info">
+                        <div class="job-title">Project Manager</div>
+                        <div class="company">Microsoft</div>
+                      </div>
+                    </td>
+                    <td class="email-cell">jane.smith@email.com</td>
+                    <td><span class="status-badge inactive">Inactive</span></td>
+                  </tr>
+                  <!-- More rows can be dynamically added by alumni.js -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination -->
+            <div id="pagination" class="pagination-container">
+              <button class="btn-secondary" id="prevPage"><i class="fas fa-chevron-left"></i> Prev</button>
+              <span id="pageInfo"></span>
+              <button class="btn-secondary" id="nextPage">Next <i class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

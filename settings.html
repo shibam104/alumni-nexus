@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - Alumni Nexus Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .settings-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .settings-section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .settings-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .settings-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.25rem;
+    }
+    
+    .settings-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0;
+    }
+    
+    .settings-description {
+      color: var(--muted-foreground);
+      margin: 0;
+      font-size: 0.875rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: var(--foreground);
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--input-background);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--foreground);
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    .form-select {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--input-background);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--foreground);
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    
+    .toggle-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      background: var(--muted);
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+    
+    .toggle-info {
+      flex: 1;
+    }
+    
+    .toggle-title {
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+    
+    .toggle-description {
+      font-size: 0.875rem;
+      color: var(--muted-foreground);
+    }
+    
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--switch-background);
+      transition: 0.4s;
+      border-radius: 24px;
+    }
+    
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .toggle-slider {
+      background-color: var(--primary-solid);
+    }
+    
+    input:checked + .toggle-slider:before {
+      transform: translateX(20px);
+    }
+    
+    .btn-save {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-save:hover {
+      background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+    
+    .btn-secondary {
+      background: var(--muted);
+      color: var(--foreground);
+      border: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      margin-right: 0.5rem;
+    }
+    
+    .btn-secondary:hover {
+      background: var(--accent);
+    }
+    
+    .danger-zone {
+      border: 1px solid #ef4444;
+      background: rgba(239, 68, 68, 0.05);
+    }
+    
+    .danger-zone .settings-icon {
+      background: #ef4444;
+    }
+    
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+    
+    .avatar-upload {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .avatar-preview {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--primary);
+    }
+    
+    .upload-btn {
+      background: var(--muted);
+      color: var(--foreground);
+      border: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+    }
+    
+    .upload-btn:hover {
+      background: var(--accent);
+    }
+    
+    @media (max-width: 768px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      
+      .avatar-upload {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar glass-card">
+      <div class="sidebar-header">
+        <div class="logo-section">
+          <div class="logo-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="logo-text">
+            <h2 class="gradient-text">Alumni Nexus</h2>
+            <p>Admin Dashboard</p>
+          </div>
+        </div>
+      </div>
+      
+      <nav class="sidebar-content">
+        <ul class="sidebar-menu">
+          <li class="sidebar-item" data-view="dashboard">
+            <a href="index.html" class="sidebar-link">
+              <i class="fas fa-home"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="alumni">
+            <a href="alumni.html" class="sidebar-link">
+              <i class="fas fa-users"></i>
+              <span>Alumni Directory</span>
+              <span class="badge">12.5K</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="events">
+            <a href="events.html" class="sidebar-link">
+              <i class="fas fa-calendar"></i>
+              <span>Events</span>
+              <span class="badge">4</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="mentorship">
+            <a href="mentorship.html" class="sidebar-link">
+              <i class="fas fa-handshake"></i>
+              <span>Mentorship</span>
+              <span class="badge">89</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="donations">
+            <a href="donations.html" class="sidebar-link">
+              <i class="fas fa-heart"></i>
+              <span>Donations</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="analytics">
+            <a href="analytics.html" class="sidebar-link">
+              <i class="fas fa-chart-bar"></i>
+              <span>Analytics</span>
+            </a>
+          </li>
+          <li class="sidebar-item active" data-view="settings">
+            <a href="settings.html" class="sidebar-link">
+              <i class="fas fa-cog"></i>
+              <span>Settings</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="dark-mode-toggle">
+          <div class="toggle-content">
+            <i class="fas fa-sun dark-mode-icon"></i>
+            <span>Dark Mode</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="darkModeToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+        
+        <div class="user-profile">
+          <div class="user-avatar">
+            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx5b3VuZyUyMHByb2Zlc3Npb25hbCUyMHdvbWFufGVufDF8fHx8MTc1OTA3ODQ1NHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" alt="Admin">
+          </div>
+          <div class="user-info">
+            <div class="user-name">Admin User</div>
+            <div class="user-email">admin@university.edu</div>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header glass-card">
+        <div class="header-left">
+          <button class="sidebar-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" placeholder="Search alumni, events, campaigns..." class="search-input">
+          </div>
+        </div>
+        
+        <div class="header-right">
+          <div class="notifications">
+            <button class="notification-btn">
+              <i class="fas fa-bell"></i>
+              <span class="notification-badge">3</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="content-area">
+        <!-- Settings View -->
+        <div id="settings-view" class="view-content active">
+          <div class="settings-container">
+            <!-- Profile Settings -->
+            <div class="settings-section">
+              <div class="settings-header">
+                <div class="settings-icon">
+                  <i class="fas fa-user"></i>
+                </div>
+                <div>
+                  <h3 class="settings-title">Profile Settings</h3>
+                  <p class="settings-description">Manage your personal information and preferences</p>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <div class="avatar-upload">
+                  <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx5b3VuZyUyMHByb2Zlc3Npb25hbCUyMHdvbWFufGVufDF8fHx8MTc1OTA3ODQ1NHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" alt="Profile" class="avatar-preview">
+                  <div>
+                    <button class="upload-btn">
+                      <i class="fas fa-upload"></i> Change Avatar
+                    </button>
+                    <p style="font-size: 0.75rem; color: var(--muted-foreground); margin-top: 0.25rem;">
+                      JPG, PNG or GIF. Max size 2MB.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">First Name</label>
+                  <input type="text" class="form-input" value="Admin" placeholder="Enter first name">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Last Name</label>
+                  <input type="text" class="form-input" value="User" placeholder="Enter last name">
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-input" value="admin@university.edu" placeholder="Enter email address">
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" class="form-input" value="+1 (555) 123-4567" placeholder="Enter phone number">
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Bio</label>
+                <textarea class="form-input form-textarea" placeholder="Tell us about yourself...">Administrator of the Alumni Nexus platform, dedicated to connecting alumni and fostering community engagement.</textarea>
+              </div>
+              
+              <button class="btn-save">
+                <i class="fas fa-save"></i> Save Profile
+              </button>
+            </div>
+
+            <!-- Platform Settings -->
+            <div class="settings-section">
+              <div class="settings-header">
+                <div class="settings-icon">
+                  <i class="fas fa-cog"></i>
+                </div>
+                <div>
+                  <h3 class="settings-title">Platform Settings</h3>
+                  <p class="settings-description">Configure platform-wide settings and preferences</p>
+                </div>
+              </div>
+              
+              <div class="toggle-group">
+                <div class="toggle-info">
+                  <div class="toggle-title">Email Notifications</div>
+                  <div class="toggle-description">Receive email notifications for important updates</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              
+              <div class="toggle-group">
+                <div class="toggle-info">
+                  <div class="toggle-title">Push Notifications</div>
+                  <div class="toggle-description">Receive push notifications in your browser</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              
+              <div class="toggle-group">
+                <div class="toggle-info">
+                  <div class="toggle-title">Public Profile</div>
+                  <div class="toggle-description">Make your profile visible to other alumni</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Default Timezone</label>
+                <select class="form-select">
+                  <option value="UTC-5">Eastern Time (UTC-5)</option>
+                  <option value="UTC-6">Central Time (UTC-6)</option>
+                  <option value="UTC-7">Mountain Time (UTC-7)</option>
+                  <option value="UTC-8">Pacific Time (UTC-8)</option>
+                  <option value="UTC+0">UTC</option>
+                  <option value="UTC+5:30">India Standard Time (UTC+5:30)</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Language</label>
+                <select class="form-select">
+                  <option value="en">English</option>
+                  <option value="es">Spanish</option>
+                  <option value="fr">French</option>
+                  <option value="de">German</option>
+                  <option value="hi">Hindi</option>
+                </select>
+              </div>
+              
+              <button class="btn-save">
+                <i class="fas fa-save"></i> Save Settings
+              </button>
+            </div>
+
+            <!-- Security Settings -->
+            <div class="settings-section">
+              <div class="settings-header">
+                <div class="settings-icon">
+                  <i class="fas fa-shield-alt"></i>
+                </div>
+                <div>
+                  <h3 class="settings-title">Security Settings</h3>
+                  <p class="settings-description">Manage your account security and privacy</p>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Current Password</label>
+                <input type="password" class="form-input" placeholder="Enter current password">
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">New Password</label>
+                <input type="password" class="form-input" placeholder="Enter new password">
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Confirm New Password</label>
+                <input type="password" class="form-input" placeholder="Confirm new password">
+              </div>
+              
+              <div class="toggle-group">
+                <div class="toggle-info">
+                  <div class="toggle-title">Two-Factor Authentication</div>
+                  <div class="toggle-description">Add an extra layer of security to your account</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              
+              <div class="toggle-group">
+                <div class="toggle-info">
+                  <div class="toggle-title">Login Alerts</div>
+                  <div class="toggle-description">Get notified when someone logs into your account</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              
+              <button class="btn-save">
+                <i class="fas fa-save"></i> Update Security
+              </button>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="settings-section danger-zone">
+              <div class="settings-header">
+                <div class="settings-icon">
+                  <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div>
+                  <h3 class="settings-title">Danger Zone</h3>
+                  <p class="settings-description">Irreversible and destructive actions</p>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <h4 style="color: #ef4444; margin-bottom: 0.5rem;">Delete Account</h4>
+                <p style="color: var(--muted-foreground); font-size: 0.875rem; margin-bottom: 1rem;">
+                  Once you delete your account, there is no going back. Please be certain.
+                </p>
+                <button class="btn-danger">
+                  <i class="fas fa-trash"></i> Delete Account
+                </button>
+              </div>
+              
+              <div class="form-group">
+                <h4 style="color: #ef4444; margin-bottom: 0.5rem;">Reset All Data</h4>
+                <p style="color: var(--muted-foreground); font-size: 0.875rem; margin-bottom: 1rem;">
+                  This will reset all platform data. This action cannot be undone.
+                </p>
+                <button class="btn-danger">
+                  <i class="fas fa-undo"></i> Reset All Data
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Settings functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      // Handle form submissions
+      const saveButtons = document.querySelectorAll('.btn-save');
+      saveButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          // Show success message
+          const originalText = this.innerHTML;
+          this.innerHTML = '<i class="fas fa-check"></i> Saved!';
+          this.style.background = '#10b981';
+          
+          setTimeout(() => {
+            this.innerHTML = originalText;
+            this.style.background = '';
+          }, 2000);
+        });
+      });
+      
+      // Handle danger zone actions
+      const dangerButtons = document.querySelectorAll('.btn-danger');
+      dangerButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const action = this.textContent.trim();
+          if (confirm(`Are you sure you want to ${action.toLowerCase()}? This action cannot be undone.`)) {
+            alert(`${action} confirmed. This is a demo - no actual action was taken.`);
+          }
+        });
+      });
+      
+      // Handle avatar upload
+      const uploadBtn = document.querySelector('.upload-btn');
+      uploadBtn.addEventListener('click', function() {
+        alert('Avatar upload functionality would be implemented here.');
+      });
+    });
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donation Campaigns - Alumni Nexus Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .campaign-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: all 0.3s ease;
+      margin-bottom: 1.5rem;
+    }
+    
+    .campaign-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+    
+    .campaign-image {
+      position: relative;
+      aspect-ratio: 16/9;
+      overflow: hidden;
+    }
+    
+    .campaign-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .campaign-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);
+    }
+    
+    .campaign-badge {
+      position: absolute;
+      bottom: 1rem;
+      left: 1rem;
+      right: 1rem;
+    }
+    
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: inline-block;
+    }
+    
+    .status-active {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .status-ending {
+      background: #ef4444;
+      color: white;
+    }
+    
+    .campaign-title {
+      color: white;
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin: 0;
+    }
+    
+    .campaign-content {
+      padding: 1.5rem;
+    }
+    
+    .campaign-category {
+      background: var(--muted);
+      color: var(--foreground);
+      padding: 0.25rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+      display: inline-block;
+    }
+    
+    .campaign-description {
+      font-size: 0.875rem;
+      color: var(--muted-foreground);
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+    
+    .progress-section {
+      margin-bottom: 1rem;
+    }
+    
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    
+    .progress-amount {
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+    
+    .progress-goal {
+      font-size: 0.875rem;
+      color: var(--muted-foreground);
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--muted);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(135deg, var(--primary-solid) 0%, rgba(102, 126, 234, 0.6) 100%);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    
+    .campaign-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      color: var(--muted-foreground);
+    }
+    
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .top-donors {
+      margin-bottom: 1rem;
+    }
+    
+    .top-donors-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    
+    .top-donors-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    
+    .donor-avatars {
+      display: flex;
+      gap: -0.5rem;
+    }
+    
+    .donor-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--card);
+      margin-left: -0.5rem;
+    }
+    
+    .donor-avatar:first-child {
+      margin-left: 0;
+    }
+    
+    .campaign-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .btn-view {
+      flex: 1;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.75rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-view:hover {
+      background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+    
+    .btn-icon {
+      background: var(--muted);
+      color: var(--foreground);
+      border: 1px solid var(--border);
+      padding: 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-icon:hover {
+      background: var(--accent);
+    }
+    
+    .overview-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      text-align: center;
+    }
+    
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.75rem;
+      font-size: 1.25rem;
+    }
+    
+    .stat-icon.green { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .stat-icon.blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+    .stat-icon.purple { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+    
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--muted-foreground);
+    }
+    
+    .stat-description {
+      font-size: 0.75rem;
+      color: var(--muted-foreground);
+      margin-top: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar glass-card">
+      <div class="sidebar-header">
+        <div class="logo-section">
+          <div class="logo-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="logo-text">
+            <h2 class="gradient-text">Alumni Nexus</h2>
+            <p>Admin Dashboard</p>
+          </div>
+        </div>
+      </div>
+      
+      <nav class="sidebar-content">
+        <ul class="sidebar-menu">
+          <li class="sidebar-item" data-view="dashboard">
+            <a href="index.html" class="sidebar-link">
+              <i class="fas fa-home"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="alumni">
+            <a href="alumni.html" class="sidebar-link">
+              <i class="fas fa-users"></i>
+              <span>Alumni Directory</span>
+              <span class="badge">12.5K</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="events">
+            <a href="events.html" class="sidebar-link">
+              <i class="fas fa-calendar"></i>
+              <span>Events</span>
+              <span class="badge">4</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="mentorship">
+            <a href="mentorship.html" class="sidebar-link">
+              <i class="fas fa-handshake"></i>
+              <span>Mentorship</span>
+              <span class="badge">89</span>
+            </a>
+          </li>
+          <li class="sidebar-item active" data-view="donations">
+            <a href="donations.html" class="sidebar-link">
+              <i class="fas fa-heart"></i>
+              <span>Donations</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="analytics">
+            <a href="analytics.html" class="sidebar-link">
+              <i class="fas fa-chart-bar"></i>
+              <span>Analytics</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="settings">
+            <a href="settings.html" class="sidebar-link">
+              <i class="fas fa-cog"></i>
+              <span>Settings</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="dark-mode-toggle">
+          <div class="toggle-content">
+            <i class="fas fa-sun dark-mode-icon"></i>
+            <span>Dark Mode</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="darkModeToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+        
+        <div class="user-profile">
+          <div class="user-avatar">
+            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx5b3VuZyUyMHByb2Zlc3Npb25hbCUyMHdvbWFufGVufDF8fHx8MTc1OTA3ODQ1NHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" alt="Admin">
+          </div>
+          <div class="user-info">
+            <div class="user-name">Admin User</div>
+            <div class="user-email">admin@university.edu</div>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header glass-card">
+        <div class="header-left">
+          <button class="sidebar-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" placeholder="Search alumni, events, campaigns..." class="search-input">
+          </div>
+        </div>
+        
+        <div class="header-right">
+          <div class="notifications">
+            <button class="notification-btn">
+              <i class="fas fa-bell"></i>
+              <span class="notification-badge">3</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="content-area">
+        <!-- Donations View -->
+        <div id="donations-view" class="view-content active">
+          <!-- Overview Section -->
+          <div class="glass-card" style="padding: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="card-header">
+              <h2 class="gradient-text">
+                <i class="fas fa-heart" style="margin-right: 0.5rem; color: #ef4444;"></i>
+                Donation Campaign Overview
+              </h2>
+              <p style="color: var(--muted-foreground); margin: 0;">Track fundraising progress across all active campaigns</p>
+            </div>
+            <div class="overview-stats" id="overview-stats">
+              <!-- Overview stats will be populated here -->
+            </div>
+          </div>
+
+          <!-- Campaigns Grid -->
+          <div id="campaigns-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+            <!-- Campaign cards will be populated here -->
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Sample Donation Campaign Data
+    const donationCampaigns = [
+      {
+        id: 1,
+        title: "Emergency Student Relief Fund",
+        description: "Supporting students facing financial hardships during their academic journey. Providing emergency assistance for tuition, housing, and basic needs.",
+        goalAmount: 500000,
+        raisedAmount: 387500,
+        donorCount: 156,
+        daysLeft: 15,
+        status: "Active",
+        category: "Student Support",
+        image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx8c2Nob2xhcnNoaXAlMjBzdHVkZW50c3xlbnwxfHx8fDE3NTkwNTY1MjF8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+        topDonors: [
+          { name: "Sarah Johnson", amount: 25000, avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx5b3VuZyUyMHByb2Zlc3Npb25hbCUyMHdvbWFufGVufDF8fHx8MTc1OTA3ODQ1NHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
+          { name: "Michael Chen", amount: 20000, avatar: "https://images.unsplash.com/photo-1589458223095-03eee50f0054?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxidXNpbmVzcyUyMGV4ZWN1dGl2ZSUyMG1hbnxlbnwxfHx8fDE3NTkwODUzNjh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" }
+        ]
+      },
+      {
+        id: 2,
+        title: "New Library Construction",
+        description: "Building a state-of-the-art library facility with modern learning spaces, digital resources, and collaborative work areas for current and future students.",
+        goalAmount: 2000000,
+        raisedAmount: 1245000,
+        donorCount: 89,
+        daysLeft: 45,
+        status: "Active", 
+        category: "Infrastructure",
+        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsaWJyYXJ5JTIwY29uc3RydWN0aW9ufGVufDF8fHx8MTc1OTA1NjUyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+        topDonors: [
+          { name: "Emily Rodriguez", amount: 100000, avatar: "https://images.unsplash.com/photo-1655249481446-25d575f1c054?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMHdvbWFufGVufDF8fHx8MTc1OTA1NjUyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
+          { name: "Robert Wilson", amount: 75000, avatar: "https://images.unsplash.com/photo-1581065178047-8ee15951ede6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBidXNpbmVzcyUyMHBvcnRyYWl0fGVufDF8fHx8MTc1OTA2Mzg4M3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" }
+        ]
+      },
+      {
+        id: 3,
+        title: "Research Innovation Grant",
+        description: "Funding cutting-edge research projects across departments. Supporting faculty and graduate students in pursuing breakthrough discoveries.",
+        goalAmount: 750000,
+        raisedAmount: 425000,
+        donorCount: 67,
+        daysLeft: 30,
+        status: "Active",
+        category: "Research",
+        image: "https://images.unsplash.com/photo-1532187643603-ba119ca4109e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZXNlYXJjaCUyMGxhYm9yYXRvcnl8ZW58MXx8fHwxNzU5MDU2NTIxfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+        topDonors: [
+          { name: "Jessica Taylor", amount: 50000, avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx5b3VuZyUyMHByb2Zlc3Npb25hbCUyMHdvbWFufGVufDF8fHx8MTc1OTA3ODQ1NHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
+          { name: "David Kim", amount: 35000, avatar: "https://images.unsplash.com/photo-1589458223095-03eee50f0054?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxidXNpbmVzcyUyMGV4ZWN1dGl2ZSUyMG1hbnxlbnwxfHx8fDE3NTkwODUzNjh8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" }
+        ]
+      },
+      {
+        id: 4,
+        title: "Alumni Scholarship Program",
+        description: "Providing merit-based scholarships to outstanding students. Creating opportunities for the next generation of leaders and innovators.",
+        goalAmount: 1000000,
+        raisedAmount: 780000,
+        donorCount: 124,
+        daysLeft: 7,
+        status: "Ending Soon",
+        category: "Scholarships",
+        image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzY2hvbGFyc2hpcCUyMHN0dWRlbnRzfGVufDF8fHx8MTc1OTA1NjUyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+        topDonors: [
+          { name: "Lisa Anderson", amount: 60000, avatar: "https://images.unsplash.com/photo-1655249481446-25d575f1c054?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMHdvbWFufGVufDF8fHx8MTc1OTA1NjUyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
+          { name: "James Brown", amount: 45000, avatar: "https://images.unsplash.com/photo-1581065178047-8ee15951ede6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBidXNpbmVzcyUyMHBvcnRyYWl0fGVufDF8fHx8MTc1OTA2Mzg4M3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" }
+        ]
+      }
+    ];
+
+    function formatCurrency(amount) {
+      if (amount >= 100000) {
+        return `₹${(amount / 100000).toFixed(1)}L`;
+      }
+      return `₹${(amount / 1000).toFixed(0)}K`;
+    }
+
+    function createCampaignCard(campaign) {
+      const progressPercentage = (campaign.raisedAmount / campaign.goalAmount) * 100;
+      const statusClass = campaign.status === "Active" ? "status-active" : "status-ending";
+
+      return `
+        <div class="campaign-card">
+          <div class="campaign-image">
+            <img src="${campaign.image}" alt="${campaign.title}">
+            <div class="campaign-overlay"></div>
+            <div class="campaign-badge">
+              <div class="status-badge ${statusClass}">${campaign.status}</div>
+              <h3 class="campaign-title">${campaign.title}</h3>
+            </div>
+          </div>
+
+          <div class="campaign-content">
+            <div class="campaign-category">${campaign.category}</div>
+            <div class="campaign-description">${campaign.description}</div>
+
+            <div class="progress-section">
+              <div class="progress-header">
+                <span class="progress-amount">${formatCurrency(campaign.raisedAmount)} raised</span>
+                <span class="progress-goal">of ${formatCurrency(campaign.goalAmount)} goal</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: ${progressPercentage}%"></div>
+              </div>
+            </div>
+
+            <div class="campaign-stats">
+              <div class="stat-item">
+                <i class="fas fa-users"></i>
+                <span>${campaign.donorCount} donors</span>
+              </div>
+              <div class="stat-item">
+                <i class="fas fa-clock"></i>
+                <span>${campaign.daysLeft} days left</span>
+              </div>
+            </div>
+
+            <div class="top-donors">
+              <div class="top-donors-header">
+                <span class="top-donors-title">Top Donors</span>
+                <div class="donor-avatars">
+                  ${campaign.topDonors.map(donor => 
+                    `<img src="${donor.avatar}" alt="${donor.name}" class="donor-avatar" title="${donor.name}: ${formatCurrency(donor.amount)}">`
+                  ).join('')}
+                </div>
+              </div>
+            </div>
+
+            <div class="campaign-actions">
+              <button class="btn-view" onclick="viewCampaign(${campaign.id})">
+                <i class="fas fa-eye"></i>
+                View Details
+              </button>
+              <button class="btn-icon" onclick="editCampaign(${campaign.id})">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn-icon" onclick="shareCampaign(${campaign.id})">
+                <i class="fas fa-share"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function createOverviewStats() {
+      const totalRaised = donationCampaigns.reduce((sum, campaign) => sum + campaign.raisedAmount, 0);
+      const totalGoal = donationCampaigns.reduce((sum, campaign) => sum + campaign.goalAmount, 0);
+      const totalDonors = donationCampaigns.reduce((sum, campaign) => sum + campaign.donorCount, 0);
+
+      return `
+        <div class="stat-card">
+          <div class="stat-icon green">
+            <i class="fas fa-trending-up"></i>
+          </div>
+          <div class="stat-value">${formatCurrency(totalRaised)}</div>
+          <div class="stat-label">Total Raised</div>
+          <div class="stat-description">${((totalRaised / totalGoal) * 100).toFixed(1)}% of total goal</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">
+            <i class="fas fa-bullseye"></i>
+          </div>
+          <div class="stat-value">${formatCurrency(totalGoal)}</div>
+          <div class="stat-label">Total Goal</div>
+          <div class="stat-description">Across ${donationCampaigns.length} campaigns</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon purple">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="stat-value">${totalDonors}</div>
+          <div class="stat-label">Total Donors</div>
+          <div class="stat-description">Unique contributors</div>
+        </div>
+      `;
+    }
+
+    function viewCampaign(id) {
+      alert(`Viewing campaign details for ID: ${id}`);
+    }
+
+    function editCampaign(id) {
+      alert(`Editing campaign with ID: ${id}`);
+    }
+
+    function shareCampaign(id) {
+      alert(`Sharing campaign with ID: ${id}`);
+    }
+
+    function renderOverviewStats() {
+      const container = document.getElementById('overview-stats');
+      container.innerHTML = createOverviewStats();
+    }
+
+    function renderCampaigns() {
+      const container = document.getElementById('campaigns-grid');
+      container.innerHTML = donationCampaigns.map(campaign => createCampaignCard(campaign)).join('');
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      renderOverviewStats();
+      renderCampaigns();
+    });
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>

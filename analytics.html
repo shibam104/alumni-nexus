@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytics - Alumni Nexus Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .analytics-main {
+      grid-column: 1 / -1;
+    }
+    
+    .analytics-side {
+      grid-column: 1;
+    }
+    
+    .analytics-full {
+      grid-column: 1 / -1;
+    }
+    
+    .chart-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .chart-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, transparent 100%);
+      pointer-events: none;
+    }
+    
+    .chart-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      z-index: 10;
+    }
+    
+    .chart-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .chart-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem 0;
+    }
+    
+    .chart-description {
+      color: var(--muted-foreground);
+      margin: 0;
+      font-size: 0.875rem;
+    }
+    
+    .chart-container {
+      position: relative;
+      height: 300px;
+    }
+    
+    .chart-container.pie {
+      height: 250px;
+    }
+    
+    .chart-container.bar {
+      height: 350px;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, transparent 100%);
+      pointer-events: none;
+    }
+    
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.75rem;
+      font-size: 1.25rem;
+      position: relative;
+      z-index: 10;
+    }
+    
+    .stat-icon.blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+    .stat-icon.green { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .stat-icon.purple { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+    .stat-icon.orange { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+    
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      position: relative;
+      z-index: 10;
+    }
+    
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--muted-foreground);
+      position: relative;
+      z-index: 10;
+    }
+    
+    .stat-change {
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      position: relative;
+      z-index: 10;
+    }
+    
+    .stat-change.positive {
+      color: #10b981;
+    }
+    
+    .stat-change.negative {
+      color: #ef4444;
+    }
+    
+    @media (max-width: 1024px) {
+      .analytics-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .analytics-main {
+        grid-column: 1;
+      }
+      
+      .analytics-side {
+        grid-column: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar glass-card">
+      <div class="sidebar-header">
+        <div class="logo-section">
+          <div class="logo-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="logo-text">
+            <h2 class="gradient-text">Alumni Nexus</h2>
+            <p>Admin Dashboard</p>
+          </div>
+        </div>
+      </div>
+      
+      <nav class="sidebar-content">
+        <ul class="sidebar-menu">
+          <li class="sidebar-item" data-view="dashboard">
+            <a href="index.html" class="sidebar-link">
+              <i class="fas fa-home"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="alumni">
+            <a href="alumni.html" class="sidebar-link">
+              <i class="fas fa-users"></i>
+              <span>Alumni Directory</span>
+              <span class="badge">12.5K</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="events">
+            <a href="events.html" class="sidebar-link">
+              <i class="fas fa-calendar"></i>
+              <span>Events</span>
+              <span class="badge">4</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="mentorship">
+            <a href="mentorship.html" class="sidebar-link">
+              <i class="fas fa-handshake"></i>
+              <span>Mentorship</span>
+              <span class="badge">89</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="donations">
+            <a href="donations.html" class="sidebar-link">
+              <i class="fas fa-heart"></i>
+              <span>Donations</span>
+            </a>
+          </li>
+          <li class="sidebar-item active" data-view="analytics">
+            <a href="analytics.html" class="sidebar-link">
+              <i class="fas fa-chart-bar"></i>
+              <span>Analytics</span>
+            </a>
+          </li>
+          <li class="sidebar-item" data-view="settings">
+            <a href="settings.html" class="sidebar-link">
+              <i class="fas fa-cog"></i>
+              <span>Settings</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="dark-mode-toggle">
+          <div class="toggle-content">
+            <i class="fas fa-sun dark-mode-icon"></i>
+            <span>Dark Mode</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="darkModeToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+        
+        <div class="user-profile">
+          <div class="user-avatar">
+            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx5b3VuZyUyMHByb2Zlc3Npb25hbCUyMHdvbWFufGVufDF8fHx8MTc1OTA3ODQ1NHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" alt="Admin">
+          </div>
+          <div class="user-info">
+            <div class="user-name">Admin User</div>
+            <div class="user-email">admin@university.edu</div>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header glass-card">
+        <div class="header-left">
+          <button class="sidebar-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" placeholder="Search alumni, events, campaigns..." class="search-input">
+          </div>
+        </div>
+        
+        <div class="header-right">
+          <div class="notifications">
+            <button class="notification-btn">
+              <i class="fas fa-bell"></i>
+              <span class="notification-badge">3</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="content-area">
+        <!-- Analytics View -->
+        <div id="analytics-view" class="view-content active">
+          <!-- Quick Stats -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon blue">
+                <i class="fas fa-users"></i>
+              </div>
+              <div class="stat-value">12,549</div>
+              <div class="stat-label">Total Alumni</div>
+              <div class="stat-change positive">+12.5% from last month</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon green">
+                <i class="fas fa-calendar"></i>
+              </div>
+              <div class="stat-value">156</div>
+              <div class="stat-label">Events Conducted</div>
+              <div class="stat-change positive">+8.2% from last month</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon purple">
+                <i class="fas fa-heart"></i>
+              </div>
+              <div class="stat-value">₹28.75L</div>
+              <div class="stat-label">Donations Raised</div>
+              <div class="stat-change positive">+15.3% from last month</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon orange">
+                <i class="fas fa-handshake"></i>
+              </div>
+              <div class="stat-value">89</div>
+              <div class="stat-label">Active Mentorships</div>
+              <div class="stat-change positive">+22.1% from last month</div>
+            </div>
+          </div>
+
+          <!-- Analytics Grid -->
+          <div class="analytics-grid">
+            <!-- Registration Chart -->
+            <div class="analytics-main chart-card">
+              <div class="chart-header">
+                <div class="chart-icon">📈</div>
+                <div>
+                  <h3 class="chart-title gradient-text">Alumni Registrations Over Time</h3>
+                  <p class="chart-description">Monthly registration trends for the current year</p>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="registrationsChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Department Chart -->
+            <div class="analytics-side chart-card">
+              <div class="chart-header">
+                <div class="chart-icon">🎓</div>
+                <div>
+                  <h3 class="chart-title gradient-text">Alumni by Department</h3>
+                  <p class="chart-description">Distribution across departments</p>
+                </div>
+              </div>
+              <div class="chart-container pie">
+                <canvas id="departmentChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Fundraising Chart -->
+            <div class="analytics-full chart-card">
+              <div class="chart-header">
+                <div class="chart-icon">💰</div>
+                <div>
+                  <h3 class="chart-title gradient-text">Fundraising by Campaign</h3>
+                  <p class="chart-description">Total amount raised across different campaigns this year</p>
+                </div>
+              </div>
+              <div class="chart-container bar">
+                <canvas id="fundraisingChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Initialize Charts
+    function initializeCharts() {
+      // Registration Chart
+      const regCtx = document.getElementById('registrationsChart');
+      if (regCtx) {
+        new Chart(regCtx, {
+          type: 'line',
+          data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [{
+              label: 'Registrations',
+              data: [156, 234, 298, 187, 345, 289, 423, 378, 456, 521, 398, 467],
+              borderColor: '#667eea',
+              backgroundColor: 'rgba(102, 126, 234, 0.1)',
+              borderWidth: 3,
+              fill: true,
+              tension: 0.4,
+              pointBackgroundColor: '#667eea',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 2,
+              pointRadius: 4,
+              pointHoverRadius: 8
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false
+              }
+            },
+            scales: {
+              x: {
+                grid: {
+                  display: false
+                },
+                ticks: {
+                  color: 'var(--muted-foreground)'
+                }
+              },
+              y: {
+                grid: {
+                  color: 'rgba(102, 126, 234, 0.1)'
+                },
+                ticks: {
+                  color: 'var(--muted-foreground)'
+                }
+              }
+            },
+            elements: {
+              point: {
+                hoverBackgroundColor: '#667eea'
+              }
+            }
+          }
+        });
+      }
+
+      // Department Chart
+      const deptCtx = document.getElementById('departmentChart');
+      if (deptCtx) {
+        new Chart(deptCtx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Engineering', 'Business', 'Arts & Sciences', 'Medicine', 'Law', 'Others'],
+            datasets: [{
+              data: [3450, 2890, 2156, 1876, 1245, 932],
+              backgroundColor: [
+                '#667eea',
+                '#f093fb',
+                '#4facfe',
+                '#43e97b',
+                '#ffecd2',
+                '#94a3b8'
+              ],
+              borderWidth: 2,
+              borderColor: 'rgba(255, 255, 255, 0.3)'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '60%',
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  color: 'var(--foreground)',
+                  padding: 20,
+                  usePointStyle: true
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // Fundraising Chart
+      const fundCtx = document.getElementById('fundraisingChart');
+      if (fundCtx) {
+        new Chart(fundCtx, {
+          type: 'bar',
+          data: {
+            labels: ['Annual Fund', 'Scholarship Fund', 'Infrastructure', 'Research Grant', 'Emergency Relief'],
+            datasets: [{
+              label: 'Amount (₹)',
+              data: [850000, 650000, 920000, 455000, 320000],
+              backgroundColor: 'rgba(102, 126, 234, 0.8)',
+              borderColor: '#667eea',
+              borderWidth: 1,
+              borderRadius: 8,
+              borderSkipped: false
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return 'Amount: ₹' + (context.parsed.y / 100000).toFixed(1) + 'L';
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                grid: {
+                  display: false
+                },
+                ticks: {
+                  color: 'var(--muted-foreground)'
+                }
+              },
+              y: {
+                grid: {
+                  color: 'rgba(102, 126, 234, 0.1)'
+                },
+                ticks: {
+                  color: 'var(--muted-foreground)',
+                  callback: function(value) {
+                    return '₹' + (value / 100000).toFixed(0) + 'L';
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeCharts();
+    });
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>
