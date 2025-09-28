@@ -7,16 +7,25 @@ let charts = {};
 
 // DOM Content Loaded
 document.addEventListener('DOMContentLoaded', function() {
-  initializeDashboard();
-  setupEventListeners();
-  initializeCharts();
-  animateCounters();
+  try {
+    initializeDashboard();
+    setupEventListeners();
+    initializeCharts();
+    animateCounters();
+  } catch (error) {
+    console.error('Error initializing dashboard:', error);
+  }
 });
 
 // Initialize Dashboard
 function initializeDashboard() {
-  // Set initial view
-  showView('dashboard');
+  // Set current view based on current page
+  currentView = getCurrentPage();
+  
+  // Set initial view (only for dashboard page)
+  if (currentView === 'dashboard') {
+    showView('dashboard');
+  }
   
   // Initialize dark mode from localStorage
   const savedTheme = localStorage.getItem('theme');
@@ -33,7 +42,15 @@ function setupEventListeners() {
   // Sidebar navigation
   const sidebarItems = document.querySelectorAll('.sidebar-item');
   sidebarItems.forEach(item => {
-    item.addEventListener('click', function() {
+    item.addEventListener('click', function(e) {
+      const link = this.querySelector('a');
+      if (link && link.getAttribute('href') && !link.getAttribute('href').startsWith('#')) {
+        // If it's a link to another page, let it navigate normally
+        return;
+      }
+      
+      // If it's a hash link, handle view switching
+      e.preventDefault();
       const view = this.dataset.view;
       showView(view);
       updateSidebarState();
@@ -84,21 +101,50 @@ function showView(viewName) {
   if (targetView) {
     targetView.classList.add('active');
     currentView = viewName;
+  } else {
+    // If view doesn't exist on this page, it means we're on a different page
+    // This is normal for single-page navigation
+    console.log(`View ${viewName} not found on current page`);
   }
 
-  // Update URL hash
-  window.location.hash = viewName;
+  // Update URL hash only if we're on the main dashboard
+  if (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/')) {
+    window.location.hash = viewName;
+  }
 }
 
 // Update Sidebar State
 function updateSidebarState() {
   const sidebarItems = document.querySelectorAll('.sidebar-item');
+  const currentPage = getCurrentPage();
+  
   sidebarItems.forEach(item => {
     item.classList.remove('active');
-    if (item.dataset.view === currentView) {
+    if (item.dataset.view === currentPage) {
       item.classList.add('active');
     }
   });
+}
+
+// Get current page name from URL
+function getCurrentPage() {
+  const path = window.location.pathname;
+  if (path.endsWith('index.html') || path.endsWith('/')) {
+    return 'dashboard';
+  } else if (path.includes('alumni.html')) {
+    return 'alumni';
+  } else if (path.includes('events.html')) {
+    return 'events';
+  } else if (path.includes('mentorship.html')) {
+    return 'mentorship';
+  } else if (path.includes('donations.html')) {
+    return 'donations';
+  } else if (path.includes('analytics.html')) {
+    return 'analytics';
+  } else if (path.includes('settings.html')) {
+    return 'settings';
+  }
+  return 'dashboard';
 }
 
 // Dark Mode Toggle
@@ -305,9 +351,10 @@ function animateCounters() {
 
 // Initialize Charts
 function initializeCharts() {
-  // Registration Chart
-  const regCtx = document.getElementById('registrationsChart');
-  if (regCtx) {
+  try {
+    // Registration Chart
+    const regCtx = document.getElementById('registrationsChart');
+    if (regCtx) {
     charts.registrations = new Chart(regCtx, {
       type: 'line',
       data: {
@@ -456,6 +503,9 @@ function initializeCharts() {
         }
       }
     });
+  }
+  } catch (error) {
+    console.error('Error initializing charts:', error);
   }
 }
 
